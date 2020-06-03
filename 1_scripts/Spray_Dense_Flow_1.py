@@ -1,57 +1,52 @@
 import cv2
+
 import numpy as np
-
-cap = cv2.VideoCapture('movingPEn.mp4')
-
-# params for ShiTomasi corner detection
-feature_params = dict( maxCorners = 100,
-                       qualityLevel = 0.3,
-                       minDistance = 7,
-                       blockSize = 7 )
-
-# Parameters for lucas kanade optical flow
-lk_params = dict( winSize  = (15,15),
-                  maxLevel = 2,
-                  criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
-
-# Create some random colors
-color = np.random.randint(0,255,(100,3))
-
-# Take first frame and find corners in it
-ret, old_frame = cap.read()
-old_gray = cv2.cvtColor(old_frame, cv2.COLOR_BGR2GRAY)
-p0 = cv2.goodFeaturesToTrack(old_gray, mask = None, **feature_params)
-
-# Create a mask image for drawing purposes
-mask = np.zeros_like(old_frame)
-
-while(1):
-    ret,frame = cap.read()
-    frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-    # calculate optical flow
-    p1, st, err = cv2.calcOpticalFlowPyrLK(old_gray, frame_gray, p0, None, **lk_params)
-
-    # Select good points
-    good_new = p1[st==1]
-    good_old = p0[st==1]
-
-    # draw the tracks
-    for i,(new,old) in enumerate(zip(good_new,good_old)):
-        a,b = new.ravel()
-        c,d = old.ravel()
-        mask = cv2.line(mask, (a,b),(c,d), color[i].tolist(), 2)
-        frame = cv2.circle(frame,(a,b),5,color[i].tolist(),-1)
-    img = cv2.add(frame,mask)
-
-    cv2.imshow('frame',img)
-    k = cv2.waitKey(30) & 0xff
-    if k == 27:
+# Get a VideoCapture object from video and store it in vs
+vc = cv2.VideoCapture('/Users/georgedamoulakis/PycharmProjects/VelocityProfiles/2_videos/spray.avi')
+# Read first frame
+ret, first_frame = vc.read()
+# Scale and resize image
+resize_dim = 600
+max_dim = max(first_frame.shape)
+scale = resize_dim / max_dim
+first_frame = cv2.resize(first_frame, None, fx=scale, fy=scale)
+# Convert to gray scale
+prev_gray = cv2.cvtColor(first_frame, cv2.COLOR_BGR2GRAY)
+# Create mask
+mask = np.zeros_like(first_frame)
+# Sets image saturation to maximum
+mask[..., 1] = 255
+out = cv2.VideoWriter('video.mp4', -1, 1, (600, 600))
+while (vc.isOpened()):
+    # Read a frame from video
+    ret, frame = vc.read()
+    # Convert new frame format`s to gray scale and resize gray frame obtained
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    gray = cv2.resize(gray, None, fx=scale, fy=scale)
+    # Calculate dense optical flow by Farneback method
+    # https://docs.opencv.org/3.0-beta/modules/video/doc/motion_analysis_and_object_tracking.html#calcopticalflowfarneback
+    flow = cv2.calcOpticalFlowFarneback(prev_gray, gray, None, pyr_scale=0.5, levels=5, winsize=11, iterations=5,
+                                        poly_n=5, poly_sigma=1.1, flags=0)
+    # Compute the magnitude and angle of the 2D vectors
+    magnitude, angle = cv2.cartToPolar(flow[..., 0], flow[..., 1])
+    # Set image hue according to the optical flow direction
+    mask[..., 0] = angle * 180 / np.pi / 2
+    # Set image value according to the optical flow magnitude (normalized)
+    mask[..., 2] = cv2.normalize(magnitude, None, 0, 255, cv2.NORM_MINMAX)
+    # Convert HSV to RGB (BGR) color representation
+    rgb = cv2.cvtColor(mask, cv2.COLOR_HSV2BGR)
+    # Resize frame size to match dimensions
+    frame = cv2.resize(frame, None, fx=scale, fy=scale)
+    # Open a new window and displays the output frame
+    dense_flow = cv2.addWeighted(frame, 1, rgb, 2, 0)
+    cv2.imshow("Dense optical flow", dense_flow)
+    #cv2.imshow("Initial video", vc )
+    out.write(dense_flow)
+    # Update previous frame
+    prev_gray = gray
+    # Frame are read by intervals of 1 millisecond. The programs breaks out of the while loop when the user presses the 'q' key
+    if cv2.waitKey(10) & 0xFF == ord('q'):
         break
-
-    # Now update the previous frame and previous points
-    old_gray = frame_gray.copy()
-    p0 = good_new.reshape(-1,1,2)
-
+# The following frees up resources and closes all windows
+vc.release()
 cv2.destroyAllWindows()
-cap.release()
