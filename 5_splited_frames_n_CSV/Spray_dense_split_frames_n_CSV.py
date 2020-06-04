@@ -53,7 +53,7 @@ while (vc.isOpened()):
     # means that the time needed per frame is 1/5
     dt = 0.2
     # after measurements 1 pixel = 8.164*10-8
-    pxToMeters = 8.164 / 100000000
+    pxToMeters = 0.0000138
     magnitudeMeters = pxToMeters * magnitude
     velocity = magnitudeMeters / dt
 
