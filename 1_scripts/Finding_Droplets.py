@@ -1,20 +1,17 @@
 import time
-import pandas as pd
+#import pandas as pd
 import cv2
 import numpy as np
 import math
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 ################## start the timer #######################
 start_time = time.time()
 
 ################## read the image #######################
 # Read image
-img = cv2.imread('/Users/georgedamoulakis/PycharmProjects/VelocityProfiles/working_directory/image_145.jpg', cv2.IMREAD_GRAYSCALE);
-crop_img = img[250:450, 100:500]
+img = cv2.imread('/Users/georgedamoulakis/PycharmProjects/VelocityProfiles/binary_by_tamal/test_0056.png', cv2.IMREAD_GRAYSCALE);
 
-# Threshold, Set values equal to or above 220 to 0, Set values below 220 to 255.
-th, im_th = cv2.threshold(crop_img, 65, 255, cv2.THRESH_BINARY_INV);
 
 def CC(img):
         nlabels, labels, stats, centroids = cv2.connectedComponentsWithStats(img)
@@ -25,9 +22,9 @@ def CC(img):
         labeled_img[label_hue == 0] = 0
         return labeled_img, nlabels, labels, stats, centroids
 
-kernel = np.ones((3, 5), np.uint8)
-erosion = cv2.erode(im_th, kernel, iterations=2)
-dilation = cv2.dilate(erosion, kernel, iterations=2)
+kernel = np.ones((2, 2), np.uint8)
+erosion = cv2.erode(img, kernel, iterations=3)
+dilation = cv2.dilate(erosion, kernel, iterations=1)
 components, nlabels, labels, stats, centroids = CC(dilation)
 
 # creating the matrices
@@ -44,29 +41,46 @@ y_centr = CC_Centroids[1]
 d = 0
 droplet_counter = 0
 Not_Droplet = np.empty(nlabels, dtype=object)
-for i in range(nlabels):
-    if area[i] > 2000 and area[i] < 500  :
-        Not_Droplet[i] = "NOT a droplet"
+
+for row in range(nlabels):
+    if (horizontal[row] > 400) or (area[row] < 90):
+        Not_Droplet[row] = "NOT a droplet"
     else:
-        Not_Droplet[i] = "ok"
+        Not_Droplet[row] = "ok"
         droplet_counter = droplet_counter + 1
+
 
 # here we draw the circles, the boxes and the numbers
 image = components
 out = image.copy()
-kk = 0
-for row in range(1, nlabels, 1):
-    for column in range(5):
-        if Not_Droplet[row] == "ok":
-            cv2.putText(out, ('%d' % (row)), (x_centr[row], y_centr[row]), cv2.FONT_HERSHEY_SIMPLEX, 0.8,
-                            (255, 255, 255), 2)
 
+for row in range(nlabels):
+    if Not_Droplet[row] == "ok":
+        cv2.putText(out, ('%d' % (row)), (x_centr[row], y_centr[row]), cv2.FONT_HERSHEY_SIMPLEX, 0.8,
+                    (255, 255, 255), 2)
+    else:
+        x_centr[row] = -1
+        y_centr[row] = -1
+        horizontal[row] = -1
+        vertical[row] = -1
+        area[row] = -1
 
-cv2.putText(out, ('%d droplets' % droplet_counter), (5, 30), cv2.FONT_ITALIC, 1.0, (220, 220, 220), 2)
+cv2.putText(out, ('%d droplets' % (droplet_counter)), (5, 30), cv2.FONT_ITALIC, 1.0, (220, 220, 220), 2)
+
+final_matrix = np.empty((nlabels, 5), np.uint8)
+for row in range(nlabels):
+    final_matrix[row][0] = x_centr[row]
+    final_matrix[row][1] = y_centr[row]
+    final_matrix[row][2] = horizontal[row]
+    final_matrix[row][3] = vertical[row]
+    final_matrix[row][4] = area[row]
+final_matrix = final_matrix[final_matrix[:,2] != 255]
+
+print(final_matrix)
 
 # show the images
-cv2.imshow("Initial", crop_img)
-cv2.imshow("Final", out)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+#cv2.imshow("Initial", img)
+#cv2.imshow("Final", out)
+#cv2.waitKey(0)
+#cv2.destroyAllWindows()
 
