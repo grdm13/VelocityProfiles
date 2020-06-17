@@ -150,9 +150,9 @@ def AVG_VELOCITY(array1, array2, array3):
 
     # print( DISTANCES(first_second_position, third_position) )
 
-    d1 = DISTANCES(first_second_position, third_position)[0] * 1.4803 / 10000000
-    d2 = DISTANCES(first_second_position, third_position)[1] * 1.4803 / 10000000
-    d3 = DISTANCES(first_second_position, third_position)[2] * 1.4803 / 10000000
+    d1 = DISTANCES(first_second_position, third_position)[0] * 6.75531915 / 1000000
+    d2 = DISTANCES(first_second_position, third_position)[1] * 6.75531915 / 1000000
+    d3 = DISTANCES(first_second_position, third_position)[2] * 6.75531915 / 1000000
 
     # velocities
     dt = (1 / 3200)  # secondds
