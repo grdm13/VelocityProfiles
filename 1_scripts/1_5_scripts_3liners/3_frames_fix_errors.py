@@ -7,7 +7,7 @@ from_62 = np.array(
     (
 [143, 116, 14, 17, 125],
 [145, 45, 20, 20, 66],
-        [0, 0, 0, 0, 0],
+        [140, 110, 14, 17, 125],
         [0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0],
@@ -18,7 +18,7 @@ from_63 = np.array(
     (
 [12, 62, 14, 17, 125],
 [45, 5, 20, 20, 66],
-        [0, 0, 0, 0, 0],
+        [22, 102, 14, 17, 125],
         [0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0],
@@ -29,7 +29,7 @@ from_64 = np.array(
     (
 [1, 61, 14, 17, 125],
 [4, 1, 20, 20, 66],
-        [0, 0, 0, 0, 0],
+        [1, 51, 14, 17, 125],
         [0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0],
@@ -42,8 +42,8 @@ def AVG_VELOCITY(array1, array2, array3):
         matching_HOR_VER = []
         Centroids_match = []
         for row in range(array1.shape[0]):
-            if (array1[row][3] == array2[row][3] - 1) or (array1[row][3] == array2[row][3] + 1) or (
-                    array1[row][3] == array2[row][3]):
+            if ((array1[row][3] > array2[row][3] - 3) and (array1[row][3] < array2[row][3] + 3)) or (
+            (array1[row][3] == array2[row][3])):
                 if (array1[row][2] == array2[row][2] - 1) or (array1[row][2] == array2[row][2] + 1) or (
                         array1[row][2] == array2[row][2]):
                     # print(from_56[row][2], from_56[row][3])
@@ -57,6 +57,7 @@ def AVG_VELOCITY(array1, array2, array3):
 
     #print(MATCHED(array1, array2))
     matched_array = np.array(MATCHED(array1,array2))
+    VelocityProfile = []
     for i in range(matched_array.shape[0]):
         if matched_array[i][0] == 0:
             print("dummy line")
@@ -155,12 +156,15 @@ def AVG_VELOCITY(array1, array2, array3):
                 v2 = d2 / dt  # m/s
                 v3 = d3 / double_dt  # m/s
 
-                print(f"the average velocity of the {i} droplet is:", round(statistics.mean([v1, v2, v3]), 2), "m/s")
+                print(f"the average velocity of the {i} droplet is:", round(statistics.mean([v1, v2, v3]), 3), "m/s")
                 print(f"---------------------------------------")
+                VelocityProfile.append(round(statistics.mean([v1, v2, v3]), 3))
+
+    return VelocityProfile
 
 
 
-AVG_VELOCITY(from_62, from_63, from_64)
+print( AVG_VELOCITY(from_62, from_63, from_64) )
 
 
 
