@@ -5,57 +5,51 @@ import matplotlib.pyplot as plt
 
 from_62 = np.array(
     (
-[143, 116, 14, 17, 125],
-[145, 45, 20, 20, 66],
-        [140, 110, 14, 17, 125],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0]
+[136.0,108.0,14.0,18.0,76.0,138.0],
+[45.0,130.0,12.0,12.0,51.0,104.0],
+[60.0,150.0,15.0,18.0,86.0,150.0]
     ), float)
-
 from_63 = np.array(
     (
-[12, 62, 14, 17, 125],
-[45, 5, 20, 20, 66],
-        [22, 102, 14, 17, 125],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0]
+[176.0,125.0,14.0,17.0,73.0,147.0],
+[112.0,177.0,18.0,18.0,88.0,169.0],
+[30.0,218.0,19.0,22.0,95.0,218.0]
     ), float)
 
 from_64 = np.array(
     (
-[1, 61, 14, 17, 125],
-[4, 1, 20, 20, 66],
-        [1, 51, 14, 17, 125],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0]
+[87.0,205.0,11.0,16.0,61.0,102.0],
+[107.0,127.0,16.0,8.0,46.0,85.0],
+[28.0,200.0,19.0,22.0,95.0,218.0]
     ), float)
+
+
 
 
 def AVG_VELOCITY(array1, array2, array3):
     def MATCHED(array1, array2):
-        matching_HOR_VER = []
+        matching_HOR_VER_PER_AREA = []
         Centroids_match = []
         for row in range(array1.shape[0]):
-            if ((array1[row][3] > array2[row][3] - 3) and (array1[row][3] < array2[row][3] + 3)) or (
-            (array1[row][3] == array2[row][3])):
-                if (array1[row][2] == array2[row][2] - 1) or (array1[row][2] == array2[row][2] + 1) or (
-                        array1[row][2] == array2[row][2]):
-                    # print(from_56[row][2], from_56[row][3])
-                    matching_HOR_VER.append((array1[row][2], array1[row][3]))
-                    Centroids_match.append((array1[row][0], array1[row][1], array2[row][0], array2[row][1]))
+            if ((array1[row][2] > array2[row][2] - 5) and (array1[row][2] < array2[row][2] + 5)):
+                if ((array1[row][3] > array2[row][3] - 5) and (array1[row][3] < array2[row][3] + 5)):
+                    if ((array1[row][4] > array2[row][4] - 10) and (array1[row][4] < array2[row][4] + 10)):
+                        if ((array1[row][5] > array2[row][5] - 35) and (array1[row][5] < array2[row][5] + 35)):
+                            matching_HOR_VER_PER_AREA.append((array1[row][2], array1[row][3]))
+                            Centroids_match.append((array1[row][0], array1[row][1], array2[row][0], array2[row][1]))
+                        else:
+                            pass
+                    else:
+                        pass
                 else:
                     pass
             else:
                 pass
+
         return Centroids_match
 
-    #print(MATCHED(array1, array2))
+    print(MATCHED(array1, array2))
+    '''
     matched_array = np.array(MATCHED(array1,array2))
     VelocityProfile = []
     for i in range(matched_array.shape[0]):
@@ -161,7 +155,7 @@ def AVG_VELOCITY(array1, array2, array3):
                 VelocityProfile.append(round(statistics.mean([v1, v2, v3]), 3))
 
     return VelocityProfile
-
+'''
 
 
 print( AVG_VELOCITY(from_62, from_63, from_64) )
