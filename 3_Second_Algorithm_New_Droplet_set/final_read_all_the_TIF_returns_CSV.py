@@ -65,9 +65,12 @@ def components_n_Canny(im_in):
                          (final_stats[row][1] - 5):(final_stats[row][1] + final_stats[row][3]),
                          (final_stats[row][0] - 5):(final_stats[row][0] + final_stats[row][2])
                          ]
-
-        l1 = len(crop_img)
-        l2 = len(crop_img[1])
+        #print(crop_img)
+        if crop_img.any():
+            l1 = len(crop_img)
+            l2 = len(crop_img[1])
+        else:
+            break
 
         white_pixels = 0
         white_pixels_edges = 0
@@ -86,9 +89,14 @@ def components_n_Canny(im_in):
     Final_stats_array = np.array(final_stats)
 
 
-    #print(Perimeter_array)
+    print(Perimeter_array)
     #print(Final_stats_array)
         #print("---------")
+
+    if Perimeter_array.any():
+        pass
+    else:
+        Perimeter_array=[0]
 
     final_matrix = np.empty((Final_stats_array.shape[0], 6), np.uint8)
     #print(Final_stats_array.shape[0])
@@ -123,7 +131,7 @@ def getListOfFiles(dirName):
 
     return allFiles
 
-dirName_TIF = "/Users/georgedamoulakis/PycharmProjects/VelocityProfiles/3_Second_Algorithm_New_Droplet_set/green_side_h0mm_us7_pos1_1_1"
+dirName_TIF = "/Users/georgedamoulakis/PycharmProjects/VelocityProfiles/3_Second_Algorithm_New_Droplet_set/reduced from 140 to 82 TIF files"
 listOfFiles_TIF = getListOfFiles(dirName_TIF)
 listOfFiles_TIF.sort()
 

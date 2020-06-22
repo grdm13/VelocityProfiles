@@ -49,7 +49,7 @@ def AVG_VELOCITY(array1, array2, array3):
         return Centroids_match
 
     print(MATCHED(array1, array2))
-    '''
+
     matched_array = np.array(MATCHED(array1,array2))
     VelocityProfile = []
     for i in range(matched_array.shape[0]):
@@ -155,7 +155,7 @@ def AVG_VELOCITY(array1, array2, array3):
                 VelocityProfile.append(round(statistics.mean([v1, v2, v3]), 3))
 
     return VelocityProfile
-'''
+
 
 
 print( AVG_VELOCITY(from_62, from_63, from_64) )
