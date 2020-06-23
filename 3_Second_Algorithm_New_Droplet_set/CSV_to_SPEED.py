@@ -108,17 +108,17 @@ for Main_i in range( len(listOfFiles) - 1 ): # i'm doing that because i will use
 #print("--------MAIN--#-2----")
 #print("MAIN #2: all the measured velocities are:")
 
-#temp = np.array(Complete_list_of_V)
+temp = np.array(Complete_list_of_V)
 #print( temp )
-#VelocityProfile_1D = []
-#for i in range(temp.shape[0]):
-#    for j in range(15):
-#        VelocityProfile_1D.append( temp[i][j] )
+VelocityProfile_1D = []
+for i in range(temp.shape[0]):
+    for j in range( len(temp[i]) ):
+        VelocityProfile_1D.append( temp[i][j] )
 
+print(VelocityProfile_1D)
 
-
-#my_df = pd.DataFrame(temp)
-#my_df.to_csv(f'FULL VELOCITY PROFILE of 67 frames.csv', header=False, index=False)  # save as csv
+my_df = pd.DataFrame(VelocityProfile_1D)
+my_df.to_csv(f'ONE ARRAY (1D) FULL VELOCITY PROFILE of 67 frames.csv', header=False, index=False)  # save as csv
 
 
 print("--- %s seconds ---" % (time.time() - start_time))
