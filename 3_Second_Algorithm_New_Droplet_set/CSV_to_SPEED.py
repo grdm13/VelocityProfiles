@@ -40,14 +40,14 @@ def AVG_VELOCITY(array1, array2):
 
     for i in range(matched_array.shape[0]):
         first_second_position = MATCHED(array1, array2)[i]
-        print(first_second_position)
+        #print(first_second_position)
         def DISTANCES(list):
             x = [list[0], list[1]]
             y = [list[2], list[3]]
             y_x_0 = y[0] - x[0]
             y_x_1 = y[1] - x[1]
             first_second_distanse = math.sqrt((y_x_0 ** 2) + (y_x_1 ** 2))
-            print("Euclidean distance from x to y: ", first_second_distanse)
+            #print("Euclidean distance from x to y: ", first_second_distanse, "pixels")
             return first_second_distanse
 
         d = DISTANCES(   first_second_position   ) * 6.75531915 / 1000000  # meters
@@ -55,13 +55,18 @@ def AVG_VELOCITY(array1, array2):
         v = d / dt  # m/s
         # print(v1)
 
-        print(f"the average velocity of the {Main_i} droplet is:", round(v, 3),
-                  "m/s")
+        #print(f"the average velocity of the {Main_i} droplet is:", round(v, 3),"m/s")
         VelocityProfile_per_row.append(round(v, 3))
-       # VelocityProfile[Main_i] = VelocityProfile_per_row
+        #print(VelocityProfile_per_row  )
+
+    V_row = np.array(VelocityProfile_per_row)
+    if V_row.any():
+        VelocityProfile[Main_i] = np.max(V_row)
+    else:
+        VelocityProfile[Main_i] = 0
 
 
-    #return VelocityProfile
+    return VelocityProfile, V_row
 
 
 
@@ -87,17 +92,34 @@ listOfFiles = getListOfFiles(dirName)
 listOfFiles.sort()
 
 VelocityProfile = np.zeros( (len(listOfFiles), 1), dtype=object)
+Complete_list_of_V = []
 
 for Main_i in range( len(listOfFiles) - 1 ): # i'm doing that because i will use triads
-    print(f"-----------------")
-    print(f"iteration no{Main_i}")
-    print(f"-----------------")
+    #print(f"-----------------")
+    #print(f"iteration no{Main_i}")
+    #print(f"-----------------")
     M0 = genfromtxt(listOfFiles[Main_i], delimiter=',', encoding= 'unicode_escape')
     M1 = genfromtxt(listOfFiles[(Main_i)+1], delimiter=',', encoding= 'unicode_escape')
-    print( AVG_VELOCITY(M0, M1) )
+    Complete_list_of_V.append(AVG_VELOCITY(M0, M1)[1])
 
-#print("MAIN : the final velocity profile is:")
-#print( AVG_VELOCITY(M0, M1))
+#print("--------MAIN--#-1----")
+#print("MAIN #1: the Maximum velocities of each frame to frame profile are:")
+#print( AVG_VELOCITY(M0, M1)[0])
+#print("--------MAIN--#-2----")
+#print("MAIN #2: all the measured velocities are:")
+
+#temp = np.array(Complete_list_of_V)
+#print( temp )
+#VelocityProfile_1D = []
+#for i in range(temp.shape[0]):
+#    for j in range(15):
+#        VelocityProfile_1D.append( temp[i][j] )
+
+
+
+#my_df = pd.DataFrame(temp)
+#my_df.to_csv(f'FULL VELOCITY PROFILE of 67 frames.csv', header=False, index=False)  # save as csv
+
 
 print("--- %s seconds ---" % (time.time() - start_time))
 
