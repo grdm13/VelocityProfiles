@@ -26,13 +26,15 @@ out = cv2.VideoWriter('video.mp4', -1, 1, (600, 600))
 
 i=0
 while (vc.isOpened()):
-    #width = vc.get(cv2.CAP_PROP_FRAME_WIDTH)  # float
-    #height = vc.get(cv2.CAP_PROP_FRAME_HEIGHT)  # float
-    #print('width, height:', width, height)
-    #fps = vc.get(cv2.CAP_PROP_FPS)
-    #print('fps:', fps)  # float
-    #frame_count = vc.get(cv2.CAP_PROP_FRAME_COUNT)
-    #print('frames count:', frame_count)  # float
+    '''
+    width = vc.get(cv2.CAP_PROP_FRAME_WIDTH)  # float
+    height = vc.get(cv2.CAP_PROP_FRAME_HEIGHT)  # float
+    print('width, height:', width, height)
+    fps = vc.get(cv2.CAP_PROP_FPS)
+    print('fps:', fps)  # float
+    frame_count = vc.get(cv2.CAP_PROP_FRAME_COUNT)
+    print('frames count:', frame_count)  # float
+    '''
 
     i=i+1
     # Read a frame from video
@@ -51,9 +53,9 @@ while (vc.isOpened()):
 ########## additions ######
     # 5 frames per second
     # means that the time needed per frame is 1/5
-    dt = 0.2
+    dt = (1 / 3200)  # secondds
     # after measurements 1 pixel = 8.164*10-8
-    pxToMeters = 8.164 / 100000000
+    pxToMeters = 6.75531915 / 1000000
     magnitudeMeters = pxToMeters * magnitude
     velocity = magnitudeMeters / dt
 
