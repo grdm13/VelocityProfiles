@@ -29,22 +29,43 @@ def getListOfFiles(dirName):
 
     return allFiles
 
-dirName_CSV = "/Users/georgedamoulakis/PycharmProjects/VelocityProfiles/tamal_Dense_Flow_CSV_velocities"
+dirName_CSV = "/Users/georgedamoulakis/PycharmProjects/VelocityProfiles/3_Second_Algorithm_New_Droplet_set/Dense_FLOW_CSV"
 listOfFiles_CSV = getListOfFiles(dirName_CSV)
-dirName_PNG = "/Users/georgedamoulakis/PycharmProjects/VelocityProfiles/tamal_Dense_Flow_Snipets_to_male_Velocities"
+listOfFiles_CSV.sort()
+#print(listOfFiles_CSV)
+dirName_PNG = "/Users/georgedamoulakis/PycharmProjects/VelocityProfiles/3_Second_Algorithm_New_Droplet_set/Dense_FLOW_IMAGES"
 listOfFiles_PNG = getListOfFiles(dirName_PNG)
+listOfFiles_PNG.sort()
 
-for i in range(len(listOfFiles_CSV)):
+
+for i in range( len(listOfFiles_CSV) - 1 ):
     img = cv2.imread(listOfFiles_PNG[i])
+    img2 = cv2.imread(listOfFiles_PNG[i+1])
     df = pd.read_csv((listOfFiles_CSV[i]))
 
     fig = plt.figure()
-    plt.subplot(3, 1, 1)
+    plt.subplot(2, 1, 1)
     ax1 = sns.heatmap(df)
-    plt.subplot(3, 1, 2)
+    #plt.subplot(2, 2, 2)
+    #ax2 = sns.distplot(df)
+    plt.tight_layout()
+    plt.show()
+    #plt.subplot(2, 2, 3)
+    #ax3 = plt.imshow(img)
+
+
+    '''
+    fig = plt.figure()
+    plt.subplot(2, 2, 1)
+    ax1 = sns.heatmap(df)
+    plt.subplot(2, 2, 2)
     ax2 = sns.distplot(df)
-    plt.subplot(3, 1, 3)
+    plt.subplot(2, 2, 3)
     ax3 = plt.imshow(img)
+    plt.subplot(2, 2, 4)
+    ax4 = plt.imshow(img)
+
     fig.savefig(f'full_figure_Tamal_{i+1} .png')
     plt.tight_layout()
     #plt.show()
+'''
