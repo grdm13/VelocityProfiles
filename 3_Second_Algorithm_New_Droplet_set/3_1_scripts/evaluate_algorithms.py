@@ -1,41 +1,176 @@
 import cv2
 import numpy as np
+import pandas as pd
+import time
+import os
 
-cap = cv2.VideoCapture( "/Volumes/FotoMacOs/6_PyCharm_Projects/VELOCITY VIDEOS and IMAGES/Evaluation/EtOH_100 pc_h0_220 C_1 mLpm_1.cine")
-#cap = cv2.VideoCapture( "/Volumes/FotoMacOs/6_PyCharm_Projects/VELOCITY VIDEOS and IMAGES/Evaluation/Water_h0_220 C_1 mLpm_1.cine")
+start_time = time.time()
 
-# (x, y, w, h) = cv2.boundingRect(c)
-# cv2.rectangle(frame, (x,y), (x+w, y+h), (0, 255, 0), 20)
-# roi = frame[y:y+h, x:x+w]
+image_counter=0
+def components_n_Canny(im_in):
+    th, im_th = cv2.threshold(im_in, 120, 255, cv2.THRESH_BINARY_INV);
+    #print(listOfFiles_TIF[i])
+    edges = cv2.Canny(im_th, 100, 100, apertureSize=3)
+    result = np.hstack((im_in, edges))
+    #cv2.imshow("result stack ", result)
+    #cv2.imshow(" sssss", result)
+    #cv2.waitKey()
+    #cv2.destroyAllWindows()
+    
 
-while True:
-    ret, frame = cap.read()
-    sky = frame[100:600, 430:500]
-    cv2.imshow('Video', sky)
+    def CC(img):
+        nlabels, labels, stats, centroids = cv2.connectedComponentsWithStats(img)
+        label_hue = np.uint8(179 * labels / np.max(labels))
+        blank_ch = 255 * np.ones_like(label_hue)
+        labeled_img = cv2.merge([label_hue, blank_ch, blank_ch])
+        labeled_img = cv2.cvtColor(labeled_img, cv2.COLOR_HSV2BGR)
+        labeled_img[label_hue == 0] = 0
+        return labeled_img, nlabels, labels, stats, centroids
 
-    if cv2.waitKey(1) == 27:
-        exit(0)
-        '''
-        # Define the codec and create VideoWriter object
-        fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        out = cv2.VideoWriter('output.avi', fourcc, 20.0, (640, 480))
 
-        while (cap.isOpened()):
-            ret, frame = cap.read()
-            if ret == True:
-                frame = cv2.flip(frame, 0)
+    kernel = np.ones((2, 2), np.uint8)
+    #erosion = cv2.erode(im_in, kernel, iterations=4)
+    dilation = cv2.dilate(im_th, kernel, iterations=8)
+    components, nlabels, labels, stats, centroids = CC(dilation)
 
-                # write the flipped frame
-                out.write(frame)
+    #cv2.imshow("components ", components)
+    #cv2.waitKey()
+    #cv2.destroyAllWindows()
 
-                cv2.imshow('frame', frame)
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    break
-            else:
-                break
 
-        # Release everything if job is finished
-        cap.release()
-        out.release()
-        cv2.destroyAllWindows()
-        '''
+
+
+    print(stats)
+
+    final_stats = []
+    f_stat_counter = 0
+    for row in range(stats.shape[0]):
+        if (stats[row][0] == 0) or (stats[row][2] < 50 ) or (stats[row][2] > 60) or (stats[row][1] == 0):
+            pass
+        else:
+            final_stats.append(stats[row])
+            f_stat_counter = f_stat_counter + 1
+
+    # print(final_stats)
+    final_stats_array = np.array(final_stats, dtype=object)
+    print(f"the artifacts for the {main_i} frame are:", nlabels, " but the droplets are:", f_stat_counter)
+    print(f"the stats for {main_i} frame are (X, Y, horizontal, vertical, area) are:")
+    print(final_stats_array)
+
+    cv2.putText(
+        components,  # numpy array on which text is written
+        "D",  # text
+        (final_stats_array[0][0] , final_stats_array[0][1] ),  # position at which writing has to start
+        cv2.FONT_HERSHEY_SIMPLEX,  # font family
+        1,  # font size
+        (209, 80, 0, 255),  # font color
+        3)  # font stroke
+
+    cv2.imshow("components ", components)
+    cv2.waitKey()
+    cv2.destroyAllWindows()
+
+
+    Perimeter = []  # in pixels
+    Area = []  # in pixels
+
+    for row in range(len(final_stats)):
+        crop_img = im_th[
+                   (final_stats[row][1] - 5):(final_stats[row][1] + final_stats[row][3]),
+                   (final_stats[row][0] - 5):(final_stats[row][0] + final_stats[row][2])
+                   ]
+        crop_img_edges = edges[
+                         (final_stats[row][1] - 5):(final_stats[row][1] + final_stats[row][3]),
+                         (final_stats[row][0] - 5):(final_stats[row][0] + final_stats[row][2])
+                         ]
+        #print(crop_img)
+        if crop_img.any():
+            l1 = len(crop_img)
+            l2 = len(crop_img[1])
+        else:
+            break
+
+        white_pixels = 0
+        white_pixels_edges = 0
+        for i in range(l1):
+            for j in range(l2):
+                if crop_img[i][j] == 255:
+                    white_pixels += 1
+                if crop_img_edges[i][j] == 255:
+                    white_pixels_edges += 1
+
+        Perimeter.append(white_pixels_edges)
+        Area.append(white_pixels)
+
+    Area_array = np.array(Area)
+    Perimeter_array = np.array(Perimeter)
+    Final_stats_array = np.array(final_stats)
+
+    #cv2.imshow("crop 1 ", crop_img)
+    #cv2.waitKey()
+    #cv2.imshow("crop 1 ", crop_img_edges)
+    #cv2.waitKey()
+    #cv2.destroyAllWindows()
+
+    #print(Perimeter_array)
+    #print(Final_stats_array)
+        #print("---------")
+
+    if Perimeter_array.any():
+        pass
+    else:
+        Perimeter_array=[0]
+
+    final_matrix = np.empty((Final_stats_array.shape[0], 6), np.uint8)
+    #print(Final_stats_array.shape[0])
+
+    for row in range(Final_stats_array.shape[0]):
+        final_matrix[row][0] = Final_stats_array[row][0]
+        final_matrix[row][1] = Final_stats_array[row][1]
+        final_matrix[row][2] = Final_stats_array[row][2]
+        final_matrix[row][3] = Final_stats_array[row][3]
+        final_matrix[row][4] = Perimeter_array[row]
+        final_matrix[row][5] = Area_array[row]
+
+    #print(final_matrix)
+    my_df = pd.DataFrame(final_matrix)
+    # image_counter = image_counter + 1
+    my_df.to_csv(f' Evaluate Algorithm: (water) TIF_to_CSV_from_ {main_i}_frame.csv', header=False, index=False)  # save as csv
+
+def getListOfFiles(dirName):
+    # create a list of file and sub directories
+    # names in the given directory
+    listOfFile = os.listdir(dirName)
+    allFiles = list()
+    # Iterate over all the entries
+    for entry in listOfFile:
+        # Create full path
+        fullPath = os.path.join(dirName, entry)
+        # If entry is a directory then get the list of files in this directory
+        if os.path.isdir(fullPath):
+            allFiles = allFiles + getListOfFiles(fullPath)
+        else:
+            allFiles.append(fullPath)
+
+    return allFiles
+
+dirName_TIF = "/Users/georgedamoulakis/PycharmProjects/VelocityProfiles/3_Second_Algorithm_New_Droplet_set/EtOH_frames_evaluation - original"
+listOfFiles_TIF = getListOfFiles(dirName_TIF)
+listOfFiles_TIF.sort()
+
+for main_i in range(len(listOfFiles_TIF)):
+    image_counter = image_counter + 1
+    word = 'Store'
+    #print(listOfFiles_TIF[main_i])
+    if word in listOfFiles_TIF[main_i]:
+        print("There is a .DS_Store file.")
+    else:
+        im_in = cv2.imread(listOfFiles_TIF[main_i], cv2.IMREAD_GRAYSCALE);
+        #print("1")
+        #cv2.imshow("sssss", im_in)
+        #cv2.waitKey()
+        #cv2.destroyAllWindows()
+        components_n_Canny(im_in)
+
+
+print("--- %s seconds ---" % (time.time() - start_time))
