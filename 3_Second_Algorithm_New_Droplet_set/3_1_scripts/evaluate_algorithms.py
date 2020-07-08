@@ -43,12 +43,14 @@ def components_n_Canny(im_in):
     print(stats)
 
     final_stats = []
+    centroid_stats = []
     f_stat_counter = 0
     for row in range(stats.shape[0]):
-        if (stats[row][0] == 0) or (stats[row][2] < 50 ) or (stats[row][2] > 60) or (stats[row][1] == 0):
+        if (stats[row][0] == 0) or (stats[row][2] < 50) or (stats[row][2] > 70) or (stats[row][1] == 0):
             pass
         else:
             final_stats.append(stats[row])
+            centroid_stats.append(centroids[row])
             f_stat_counter = f_stat_counter + 1
 
     # print(final_stats)
@@ -57,14 +59,16 @@ def components_n_Canny(im_in):
     print(f"the stats for {main_i} frame are (X, Y, horizontal, vertical, area) are:")
     print(final_stats_array)
 
+    '''
     cv2.putText(
         components,  # numpy array on which text is written
         "D",  # text
-        (final_stats_array[0][0] , final_stats_array[0][1] ),  # position at which writing has to start
+        (final_stats_array[0][0], final_stats_array[0][1]),  # position at which writing has to start
         cv2.FONT_HERSHEY_SIMPLEX,  # font family
         1,  # font size
         (209, 80, 0, 255),  # font color
         3)  # font stroke
+    '''
 
     cv2.imshow("components ", components)
     cv2.waitKey()
@@ -105,6 +109,7 @@ def components_n_Canny(im_in):
     Area_array = np.array(Area)
     Perimeter_array = np.array(Perimeter)
     Final_stats_array = np.array(final_stats)
+    Centroids_stats_array = np.array(centroid_stats)
 
     #cv2.imshow("crop 1 ", crop_img)
     #cv2.waitKey()
@@ -125,8 +130,8 @@ def components_n_Canny(im_in):
     #print(Final_stats_array.shape[0])
 
     for row in range(Final_stats_array.shape[0]):
-        final_matrix[row][0] = Final_stats_array[row][0]
-        final_matrix[row][1] = Final_stats_array[row][1]
+        final_matrix[row][0] = Centroids_stats_array[row][0]
+        final_matrix[row][1] = Centroids_stats_array[row][1]
         final_matrix[row][2] = Final_stats_array[row][2]
         final_matrix[row][3] = Final_stats_array[row][3]
         final_matrix[row][4] = Perimeter_array[row]
@@ -135,7 +140,7 @@ def components_n_Canny(im_in):
     #print(final_matrix)
     my_df = pd.DataFrame(final_matrix)
     # image_counter = image_counter + 1
-    my_df.to_csv(f' Evaluate Algorithm: (water) TIF_to_CSV_from_ {main_i}_frame.csv', header=False, index=False)  # save as csv
+    my_df.to_csv(f' Evaluate Algorithm: (water) (NB) TIF_to_CSV_from_ {main_i}_frame.csv', header=False, index=False)  # save as csv
 
 def getListOfFiles(dirName):
     # create a list of file and sub directories
@@ -154,7 +159,7 @@ def getListOfFiles(dirName):
 
     return allFiles
 
-dirName_TIF = "/Users/georgedamoulakis/PycharmProjects/VelocityProfiles/3_Second_Algorithm_New_Droplet_set/EtOH_frames_evaluation - original"
+dirName_TIF = "/Users/georgedamoulakis/PycharmProjects/VelocityProfiles/3_Second_Algorithm_New_Droplet_set/evaluation Tamal - NB (near bottom)/NB - water/water_snipets"
 listOfFiles_TIF = getListOfFiles(dirName_TIF)
 listOfFiles_TIF.sort()
 
