@@ -29,22 +29,24 @@ def getListOfFiles(dirName):
 
     return allFiles
 
-dirName_CSV = "/Users/georgedamoulakis/PycharmProjects/VelocityProfiles/tamal_Dense_Flow_CSV_velocities"
+dirName_CSV = "/Users/georgedamoulakis/PycharmProjects/VelocityProfiles/after resize"
 listOfFiles_CSV = getListOfFiles(dirName_CSV)
-dirName_PNG = "/Users/georgedamoulakis/PycharmProjects/VelocityProfiles/tamal_Dense_Flow_Snipets_to_male_Velocities"
-listOfFiles_PNG = getListOfFiles(dirName_PNG)
+#dirName_PNG = "/Users/georgedamoulakis/PycharmProjects/VelocityProfiles/tamal_Dense_Flow_Snipets_to_male_Velocities"
+#listOfFiles_PNG = getListOfFiles(dirName_PNG)
 
 for i in range(len(listOfFiles_CSV)):
-    img = cv2.imread(listOfFiles_PNG[i])
+    #img = cv2.imread(listOfFiles_PNG[i])
     df = pd.read_csv((listOfFiles_CSV[i]))
 
     fig = plt.figure()
-    plt.subplot(3, 1, 1)
-    ax1 = sns.heatmap(df)
-    plt.subplot(3, 1, 2)
-    ax2 = sns.distplot(df)
-    plt.subplot(3, 1, 3)
-    ax3 = plt.imshow(img)
-    fig.savefig(f'full_figure_Tamal_{i+1} .png')
+    plt.subplot(2, 1, 1)
+    ax1 = sns.heatmap(df, xticklabels=False, yticklabels=False)
+    ax1.set(xlabel="Velocity Heatmap in [m/s]")
+    plt.subplot(2, 1, 2)
+    ax2 = sns.distplot(df, kde=False, norm_hist=False)
+    ax2.set(xlabel="Velocity [m/s]", ylabel="Percent [%]")
+    #plt.subplot(3, 1, 3)
+    #ax3 = plt.imshow(img)
+    fig.savefig(f'full_figure_Tamal_{i+1} A.png')
     plt.tight_layout()
     #plt.show()
