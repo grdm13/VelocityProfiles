@@ -1,0 +1,178 @@
+import matplotlib.pyplot as plt
+import pandas as pd
+import os
+import seaborn as sns
+import cv2
+import numpy as np
+import time
+import os
+from numpy import genfromtxt
+import pandas as pd
+import statistics
+import math
+import re
+
+start_time = time.time()
+
+#==================START-VIDEO=====================================
+vc = cv2.VideoCapture("D:\\4. Tamal videos\\30pcHP\\side\\green_HP_h4_us7_1.cine")
+pathhhhh = "D:\\4. Tamal videos\\30pcHP\\side\\green_HP_h4_us7_1.cine"
+print("==========Video Details==========")
+width = vc.get(cv2.CAP_PROP_FRAME_WIDTH)  # float
+height = vc.get(cv2.CAP_PROP_FRAME_HEIGHT)  # float
+print('VC: width, height:', width, height)
+fps = vc.get(cv2.CAP_PROP_FPS)
+print('fps:', fps)  # float
+frame_count = vc.get(cv2.CAP_PROP_FRAME_COUNT)
+print('frames count:', frame_count)  # float
+print("=================================")
+ret, first_frame = vc.read()
+# Scale and resize image
+resize_dim = 600
+max_dim = max(first_frame.shape)
+scale = resize_dim / max_dim
+first_frame = cv2.resize(first_frame, None, fx=scale, fy=scale)
+#==================END-VIDEO=====================================
+
+def getListOfFiles(dirName):
+    # create a list of file and sub directories
+    # names in the given directory
+    listOfFile = os.listdir(dirName)
+    allFiles = list()
+    # Iterate over all the entries
+    for entry in listOfFile:
+        # Create full path
+        fullPath = os.path.join(dirName, entry)
+        # If entry is a directory then get the list of files in this directory
+        if os.path.isdir(fullPath):
+            allFiles = allFiles + getListOfFiles(fullPath)
+        else:
+            allFiles.append(fullPath)
+
+    return allFiles
+
+def atoi(text):
+    return int(text) if text.isdigit() else text
+
+def natural_keys(text):
+    return [ atoi(c) for c in re.split(r'(\d+)', text) ]
+
+dirName_CSV = "C:\\Users\\georg\\PycharmProjects\\TamalDenstist\\green_HP_h4_us7_1-Geo_CSV"
+listOfFiles_CSV = getListOfFiles(dirName_CSV)
+listOfFiles_CSV.sort(key=natural_keys)
+
+VelocityProfile = []
+XdimensionProfile = []
+YdimensionProfile = []
+PerimeterProfile = []
+AreaProfile = []
+
+for i in range(len(listOfFiles_CSV)-1):
+    print(f"---------iteration no{i}---------------")
+    file_path_1 = listOfFiles_CSV[i]
+    file_path_2 = listOfFiles_CSV[i+1]
+    # check if size of file is 0
+    if ( os.stat(file_path_1).st_size == 0 and os.stat(file_path_2).st_size == 0):
+        pass
+        #print('BOTH FILES EMPTY')
+    else:
+        #print('good')
+        M1 = genfromtxt(listOfFiles_CSV[i], delimiter=',', encoding='unicode_escape')
+        M2 = genfromtxt(listOfFiles_CSV[(i) + 1], delimiter=',', encoding='unicode_escape')
+        if (M1.any() and M2.any()):
+            #print("M1 = ", file_path_1)
+            #print("M2 = ", file_path_2)
+
+            shapeM1 = np.asarray(M1.shape)
+            shapeM2 = np.asarray(M2.shape)
+            if len(shapeM1) < 2:
+                M1 = M1.reshape(len(M1), 1)
+                if len(shapeM2) < 2:
+                    #print("length of shape 2 ", len(shapeM2)  )
+                    M2 = M2.reshape(len(M2), 1)
+                else: pass
+            else:
+                if len(shapeM2) < 2:
+                    #print("length of shape 2 ", len(shapeM2)  )
+                    M2 = M2.reshape(len(M2), 1)
+                else: pass
+
+        NEWshapeM1 = np.asarray(M1.shape)
+        NEWshapeM2 = np.asarray(M2.shape)
+
+        if ( len(NEWshapeM1)>1 and len(NEWshapeM2)>1 ):
+            #print(NEWshapeM1)
+            #print(NEWshapeM2)
+            if (NEWshapeM1[1] == 1 and NEWshapeM2[1] == 1):
+                if ((M1[2] > M2[2] - 2) and (M1[2] < M2[2] + 2)):
+                    if ((M1[3] > M2[3] - 2) and (M1[3] < M2[3] + 2)):
+                        if ((M1[4] > M2[4] - 4) and (M1[4] < M2[4] + 4)):
+                            if ((M1[5] > M2[5] - 10) and (M1[5] < M2[5] + 10)):
+                                x = [M1[0], M1[1]]
+                                y = [M2[0], M2[1]]
+                                y_x_0 = y[0] - x[0]
+                                y_x_1 = y[1] - x[1]
+                                first_second_distanse = math.sqrt((y_x_0 ** 2) + (y_x_1 ** 2))
+                                #print("Euclidean distance from x to y: ", first_second_distanse, "pixels")
+                                dt = (1 / fps)  # seconds
+                                pxToMeters = (6.75531915 / 1000000)  # / scale
+                                distanse_meters = pxToMeters * first_second_distanse
+                                velocity = distanse_meters / dt
+                                print("velocity", velocity, "m/s")
+                                VelocityProfile.append(velocity)
+                                XdimensionProfile.append(M1[2])
+                                YdimensionProfile.append(M1[3])
+                                PerimeterProfile.append(M1[4])
+                                AreaProfile.append(M1[5])
+            elif (NEWshapeM1[1] == 6 and NEWshapeM2[1] == 6):
+                minimum = min(NEWshapeM1[0], NEWshapeM2[0])
+                for row in range(minimum):
+                    if ( (M1[row][2] > (M2[row][2] - 2)) and (M1[row][2] <  (M2[row][2] + 2)) ):
+                        if ((M1[row][3] > M2[row][3] - 2) and (M1[row][3] < M2[row][3] + 2)):
+                            if ((M1[row][4] > M2[row][4] - 4) and (M1[row][4] < M2[row][4] + 4)):
+                                if ((M1[row][5] > M2[row][5] - 10) and (M1[row][5] < M2[row][5] + 10)):
+                                    x = [ M1[row][0], M1[row][1] ]
+                                    y = [ M2[row][0], M2[row][1] ]
+                                    y_x_0 = y[0] - x[0]
+                                    y_x_1 = y[1] - x[1]
+                                    first_second_distanse = math.sqrt((y_x_0 ** 2) + (y_x_1 ** 2))
+                                    #print("Euclidean distance from x to y: ", first_second_distanse, "pixels")
+                                    dt = (1 / fps)  # seconds
+                                    pxToMeters = (6.75531915 / 1000000)  # / scale
+                                    distanse_meters = pxToMeters * first_second_distanse
+                                    velocity = distanse_meters / dt
+                                    print("velocity", velocity, "m/s")
+                                    VelocityProfile.append(velocity)
+                                    XdimensionProfile.append(M1[row][2])
+                                    YdimensionProfile.append(M1[row][3])
+                                    PerimeterProfile.append(M1[row][4])
+                                    AreaProfile.append(M1[row][5])
+
+# the loop is over --- now we are out of the loop
+Velocity_array  = np.array( VelocityProfile)
+X_array         = np.array(XdimensionProfile)
+Y_array         = np.array(YdimensionProfile)
+Perimeter_array = np.array(PerimeterProfile)
+Area_array      = np.array(AreaProfile)
+
+
+final_matrix = np.empty((Velocity_array.shape[0], 5), float)
+
+for row in range(Velocity_array.shape[0]):
+    final_matrix[row][0] = X_array[row]
+    final_matrix[row][1] = Y_array[row]
+    final_matrix[row][2] = Perimeter_array[row]
+    final_matrix[row][3] = Area_array[row]
+    final_matrix[row][4] = Velocity_array[row]
+
+print("this is the last print:")
+print("--------------------------")
+print("--------------------------")
+print("--------------------------")
+print("--------------------------")
+print(final_matrix)
+
+my_df = pd.DataFrame(final_matrix)
+my_df.to_csv(f' Final matrix for  CINE file.csv', header=False, index=False)  # save as csv
+
+print("--- %s seconds ---" % (time.time() - start_time))
