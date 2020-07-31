@@ -1,0 +1,39 @@
+import matplotlib.pyplot as plt
+import pandas as pd
+import os
+import seaborn as sns
+
+
+def getListOfFiles(dirName):
+    # create a list of file and sub directories
+    # names in the given directory
+    listOfFile = os.listdir(dirName)
+    allFiles = list()
+    # Iterate over all the entries
+    for entry in listOfFile:
+        # Create full path
+        fullPath = os.path.join(dirName, entry)
+        # If entry is a directory then get the list of files in this directory
+        if os.path.isdir(fullPath):
+            allFiles = allFiles + getListOfFiles(fullPath)
+        else:
+            allFiles.append(fullPath)
+
+    return allFiles
+
+dirName_CSV = "D:\\4. Tamal videos\\15pcHP\\front\\1.5 front\\green_us7_pos1_h0_1-CSV"
+listOfFiles_CSV = getListOfFiles(dirName_CSV)
+
+for i in range(len(listOfFiles_CSV)):
+    df = pd.read_csv((listOfFiles_CSV[i]))
+
+    fig = plt.figure()
+    plt.subplot(2, 1, 1)
+    ax1 = sns.heatmap(df, xticklabels=False, yticklabels=False, vmin=0.2, vmax=2.2)
+    ax1.set(xlabel="Velocity Heatmap in [m/s]")
+    plt.subplot(2, 1, 2)
+    ax2 = sns.distplot(df, kde=False, norm_hist=False)
+    ax2.set(xlabel="Velocity [m/s]", ylabel="Count [cells]")
+    fig.savefig(f'full_figure heatmap {i+1}.png')
+    plt.tight_layout()
+    print(f'printed the {i} map')
